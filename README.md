@@ -40,7 +40,8 @@ FastAPI (backend/app)
 ```powershell
 scripts\setup.ps1                  # venv + app dependencies + backend\.env (random secret) + empty database
 scripts\setup.ps1 -WithAI          # also TensorFlow + Ultralytics (several GB)
-scripts\create_admin.ps1 -Username shopowner -Seed     # prompts for a password (min 10 chars); -Seed adds the 8 original products
+scripts\create_admin.ps1 -Username shopowner -Seed     # creates/resets an admin with hidden password prompts; -Seed adds products
+cd backend; ..\.venv\Scripts\python.exe -m app.manage provision-admin --username ravi  # prompts to create/reset an admin
 scripts\run.ps1                    # http://localhost:8000   (API docs: http://localhost:8000/docs)
 scripts\test.ps1                   # pytest
 ```
@@ -50,6 +51,33 @@ Create more users: `cd backend; ..\.venv\Scripts\python -m app.manage create-use
 
 ## Configuration
 Copy `backend/.env.example` to `backend/.env` (done by `setup.ps1`). Secrets live only in `.env`; `SMART_CORS_ORIGINS` is an explicit list (never `*`). **Local-demo vs production:** this setup is for a single shop on one PC. For anything public, add HTTPS, a real `SMART_SECRET_KEY`, login rate limiting (not implemented), backups, and review CORS.
+
+## Registration, administrator provisioning, and Render
+
+The public **Create account** page and `POST /api/auth/register` create cashier accounts only. The request schema rejects extra fields such as `role`, and usernames are normalized and checked for duplicates. Administrator access must be provisioned through the management CLI. Passwords are prompted without echo, confirmed, and stored only as scrypt hashes.
+
+The API and frontend are served by the same FastAPI service. The frontend calls root-relative `/api/...` URLs, so it uses the deployed host automatically; do not put a localhost URL in frontend code. CORS is needed only if the frontend is hosted on a different origin, in which case set `SMART_CORS_ORIGINS` to that exact HTTPS origin.
+
+There is no Render manifest or hosted-service URL in this repository, so the actual Render service settings and production database cannot be inspected from this checkout. The application uses `SMART_DATABASE_URL` first, then Render's standard `DATABASE_URL`, and otherwise defaults to SQLite at `backend/data/smart_retail.db`. Do not run the provisioning command on a developer machine and assume it changed the Render database.
+
+### Render service setup and deployment
+
+1. In the Render dashboard, inspect the existing service's **Root Directory**, **Build Command**, **Start Command**, **Environment**, and attached disk/database before changing anything. Preserve the existing database. There are no Alembic migrations; startup calls SQLAlchemy `create_all`, and this change adds no schema columns.
+2. Ensure the build installs `backend/requirements.txt` (from the repository root, `pip install -r backend/requirements.txt`). The backend supports SQLite and PostgreSQL; PostgreSQL URLs are connected through the psycopg driver installed from that requirements file.
+3. If the service root is the repository root, a compatible start command is `cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT`. If Render's root directory is already `backend`, use `python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+4. Set a stable, random `SMART_SECRET_KEY` of at least 32 characters in Render's protected environment settings. Set `SMART_DATABASE_URL` to the production database URL if using PostgreSQL, or confirm Render's `DATABASE_URL` is present (it is used if `SMART_DATABASE_URL` is unset). Keep the URL in Render only; never paste it into source control or a local terminal. If using SQLite, attach a persistent disk and point `SMART_DATABASE_URL` at the database file on that disk; Render's default ephemeral filesystem is not durable across restarts/redeploys.
+5. Deploy and wait for the service to become healthy. Confirm `https://<your-service-host>/api/health` returns HTTP 200 with `status` set to `ok` and the root page loads before provisioning.
+6. Open the **Shell for that same running Render web service** (not a local terminal and not a separate service with different environment variables), change to the backend directory if needed, and run the existing account setup command:
+
+   ```sh
+   cd backend
+   python -m app.manage provision-admin --username ravi --full-name Ravi
+   ```
+
+   Enter and confirm the temporary viva password at the hidden prompts. Do not add it as a command-line argument or print it; the command refuses to prompt unless it has a terminal that can keep the password hidden. The command safely creates the admin if absent, or resets that matching account's password, role, and active flag. It never deletes other users, products, bills, or records. It reports only whether the account was created or updated.
+7. Visit `https://<your-service-host>/`, sign in using the provisioned credentials, and confirm the dashboard loads. Verify existing products and a test checkout before the viva. If provisioning or login fails, inspect Render service logs and verify that the Shell belongs to the web service, its selected `SMART_DATABASE_URL`/`DATABASE_URL` points to the intended production DB, and the database permits connections from the service. For `No module named psycopg`, confirm the requirements build completed and redeploy. For cross-origin frontend hosting, verify the exact frontend origin is in `SMART_CORS_ORIGINS`.
+
+The production login is not verified by this repository change: it requires access to the actual Render service, its configured database, and its public URL. After the viva, change the temporary password using the same Shell command and choose a longer, unique password.
 
 ## AI model setup
 The GitHub repository does **not** contain these (they are git-ignored). Place them in the project root, or point `SMART_KERAS_MODEL` / `SMART_YOLO_MODEL` at them:
