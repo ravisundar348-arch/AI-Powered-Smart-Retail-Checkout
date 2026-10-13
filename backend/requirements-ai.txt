@@ -1,0 +1,6 @@
+# Heavy AI stack, only needed for real detection/classification.
+# Install AFTER requirements.txt:  pip install -r requirements-ai.txt
+# Use the same TensorFlow/Keras major version that saved full_model.keras (Colab at the time of training).
+# Native Windows TensorFlow >= 2.11 is CPU-only; for TF on the RTX 3050 use WSL2. YOLO (PyTorch) can use CUDA on Windows.
+tensorflow>=2.16
+ultralytics>=8.2

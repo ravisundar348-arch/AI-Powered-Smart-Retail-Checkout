@@ -1,0 +1,19 @@
+{
+  "_comment": "Ported unchanged from Detect_Classify_Bill.ipynb (festival dates are the notebook's 2025 dates and are therefore expired; edit this file to schedule new offers). Combos reference product SKUs.",
+  "festivals": [
+    {"name": "Republic Day",     "start_date": "2025-01-24", "end_date": "2025-01-26", "discount_percent": 10},
+    {"name": "Holi",             "start_date": "2025-03-12", "end_date": "2025-03-15", "discount_percent": 20},
+    {"name": "Independence Day", "start_date": "2025-08-14", "end_date": "2025-08-16", "discount_percent": 10},
+    {"name": "Raksha Bandhan",   "start_date": "2025-08-08", "end_date": "2025-08-10", "discount_percent": 12},
+    {"name": "Ganesh Chaturthi", "start_date": "2025-08-26", "end_date": "2025-08-28", "discount_percent": 18},
+    {"name": "Dussehra",         "start_date": "2025-10-01", "end_date": "2025-10-03", "discount_percent": 20},
+    {"name": "Diwali",           "start_date": "2025-10-18", "end_date": "2025-10-23", "discount_percent": 25},
+    {"name": "Christmas",        "start_date": "2025-12-24", "end_date": "2025-12-26", "discount_percent": 5},
+    {"name": "New Year",         "start_date": "2025-12-30", "end_date": "2026-01-02", "discount_percent": 8}
+  ],
+  "combos": [
+    {"name": "Snack Combo",         "skus": ["AMUL-ICE-CREAM", "THUMS-UP"],                 "discount_percent": 3},
+    {"name": "Breakfast Combo",     "skus": ["NESTLE-MILK-POWDER", "CAKE"],                 "discount_percent": 4},
+    {"name": "Personal Care Combo", "skus": ["HNS-SHAMPOO", "PLUM", "CERAVE"],              "discount_percent": 15}
+  ]
+}

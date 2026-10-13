@@ -1,0 +1,57 @@
+# Jupyter
+.ipynb_checkpoints/
+
+# Datasets (do not upload)
+Aug_Dataset/
+Web_Images/
+
+
+# Python
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+# --- Smart Retail Checkout app (added) ---
+.venv/
+backend/.env
+backend/data/
+backend/storage/
+.pytest_cache/
+Converted_Images/
+# Python virtual environments
+.venv/
+.venv-ai/
+
+# Python cache and test files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Local development files
+.vscode/
+.idea/
+# Keep secrets private
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+
+# Exclude local Python environments
+.venv/
+.venv-ai/
+# Training datasets - keep locally
+Dataset/
+Aug_Dataset/
+
+# Local backup files
+Model_Training.backup.ipynb
+# Allow the example environment configuration
+!backend/.env.example
